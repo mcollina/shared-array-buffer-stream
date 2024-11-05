@@ -1,0 +1,30 @@
+{
+  "name": "shared-array-buffer-stream",
+  "version": "0.0.1",
+  "description": "A stream implementation across threads, backed by SharedArrayBuffer",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint && node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mcollina/shared-array-buffer-stream.git"
+  },
+  "keywords": [
+    "thread",
+    "shared",
+    "array",
+    "buffer",
+    "workers"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/shared-array-buffer-stream/issues"
+  },
+  "homepage": "https://github.com/mcollina/shared-array-buffer-stream#readme",
+  "devDependencies": {
+    "eslint": "^9.14.0",
+    "neostandard": "^0.11.7"
+  }
+}
