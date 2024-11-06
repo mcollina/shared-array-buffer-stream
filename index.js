@@ -7,7 +7,10 @@ const assert = require('node:assert/strict')
 const DATA_OFFSET = 128
 const CLOSED = 2
 
-const STATE_READABLE_SIZE = 4
+// We are keeping the state as 64 bytes so that they sit in two different
+// cache lanes and avoid false sharing
+const STATE_READABLE_SIZE = 64 
+const STATE_WRITABLE_SIZE = 64
 
 class SharedArrayBufferReadable extends Readable {
   constructor (opts) {
@@ -30,7 +33,7 @@ class SharedArrayBufferReadable extends Readable {
     // Keep the first 4 bytes for metadata of the Readable size
     this._metaReadable = new Int32Array(this._sharedArrayBuffer, 0, STATE_READABLE_SIZE)
     // Keep the next 8 bytes for metadata of the Writable size
-    this._metaWritable = new Int32Array(this._sharedArrayBuffer, 4, 8)
+    this._metaWritable = new Int32Array(this._sharedArrayBuffer, STATE_READABLE_SIZE, STATE_WRITABLE_SIZE)
 
     Atomics.store(this._metaReadable, 0, 0)
   }
@@ -84,9 +87,9 @@ class SharedArrayBufferWritable extends Writable {
     this._sharedArrayBuffer = opts.sharedArrayBuffer
 
     // Keep the first 4 bytes for metadata of the Readable size
-    this._metaReadable = new Int32Array(this._sharedArrayBuffer, 0, 4)
+    this._metaReadable = new Int32Array(this._sharedArrayBuffer, 0, STATE_READABLE_SIZE)
     // Keep the next 8 bytes for metadata of the Writable size
-    this._metaWritable = new Int32Array(this._sharedArrayBuffer, 4, 8)
+    this._metaWritable = new Int32Array(this._sharedArrayBuffer, STATE_READABLE_SIZE, STATE_WRITABLE_SIZE)
 
     Atomics.store(this._metaWritable, 0, 0)
   }
