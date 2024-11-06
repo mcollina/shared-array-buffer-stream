@@ -41,3 +41,30 @@ test('consumer to producer', async (t) => {
 
   await once(worker, 'exit')
 })
+
+test('flushSync', async (t) => {
+  t.plan(4)
+
+  const sharedArrayBuffer = new SharedArrayBuffer(1024, {
+    maxByteLength: 16 * 1024 * 1024
+  })
+
+  const worker = new Worker(join(__dirname, '..', 'fixtures', 'producer-flushSync.js'), {
+    workerData: { sharedArrayBuffer }
+  })
+  const readable = new SharedArrayBufferReadable({ sharedArrayBuffer, worker, objectMode: true })
+
+  const expected = [
+    'Hello, A!',
+    'Hello, B!',
+    'Hello, C!'
+  ]
+
+  try {
+    for await (const chunk of readable) {
+      t.assert.equal(chunk.toString(), expected.shift())
+    }
+  } catch (err) {
+    t.assert.equal(err.code, 'ERR_STREAM_PREMATURE_CLOSE')
+  }
+})
