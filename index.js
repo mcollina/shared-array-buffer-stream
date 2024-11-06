@@ -99,9 +99,7 @@ class SharedArrayBufferWritable extends Writable {
 
     if (res1.async) {
       res1.value.then(() => {
-        process.nextTick(() => {
-          this._actualWrite(chunk, encoding, callback)
-        })
+        this._actualWrite(chunk, encoding, callback)
       })
     } else {
       this._actualWrite(chunk, encoding, callback)
@@ -116,12 +114,12 @@ class SharedArrayBufferWritable extends Writable {
 
     if (res.async) {
       res.value.then(() => {
-        process.nextTick(callback)
-      }).catch((err) => {
-        process.nextTick(callback, err)
+        callback()
+      }, (err) => {
+        callback(err)
       })
     } else {
-      process.nextTick(callback)
+      callback()
     }
   }
 
