@@ -9,7 +9,7 @@ const CLOSED = 2
 
 // We are keeping the state as 64 bytes so that they sit in two different
 // cache lanes and avoid false sharing
-const STATE_READABLE_SIZE = 64 
+const STATE_READABLE_SIZE = 64
 const STATE_WRITABLE_SIZE = 64
 
 class SharedArrayBufferReadable extends Readable {
@@ -124,10 +124,11 @@ class SharedArrayBufferWritable extends Writable {
   }
 
   flushSync () {
-    const r = Atomics.wait(this._metaReadable, 0, 0)
+    Atomics.wait(this._metaReadable, 0, 0)
     const buffer = this._writableState.getBuffer()
 
     for (const { chunk } of buffer) {
+      // TODO add the timeout handling to avoid deadlocks
       Atomics.wait(this._metaWritable, 0, 1)
       write(this._sharedArrayBuffer, chunk, DATA_OFFSET)
       Atomics.store(this._metaWritable, 0, 1)

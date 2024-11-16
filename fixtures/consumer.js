@@ -18,4 +18,3 @@ readable.on('end', () => {
   clearInterval(interval)
   parentPort.postMessage({ chunks })
 })
-
