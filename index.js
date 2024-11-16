@@ -100,19 +100,27 @@ class SharedArrayBufferWritable extends Writable {
   }
 
   _write (chunk, encoding, callback) {
+    this._writev([{ chunk, encoding }], callback)
+  }
+
+  _writev (chunks, callback) {
     const res1 = Atomics.waitAsync(this._metaReadable, 0, 0)
 
     if (res1.async) {
       res1.value.then(() => {
-        this._actualWrite(chunk, encoding, callback)
+        this._actualWrite(chunks, callback)
       })
     } else {
-      this._actualWrite(chunk, encoding, callback)
+      this._actualWrite(chunks, callback)
     }
   }
 
-  _actualWrite (chunk, encoding, callback) {
-    write(this._sharedArrayBuffer, [chunk], DATA_OFFSET)
+  _actualWrite (chunks, callback) {
+    const toWrite = new Array(chunks.length)
+    for (let i = 0; i < chunks.length; i++) {
+      toWrite[i] = chunks[i].chunk
+    }
+    write(this._sharedArrayBuffer, toWrite, DATA_OFFSET)
     Atomics.store(this._metaWritable, 0, 1)
     Atomics.notify(this._metaWritable, 0, 1)
     const res = Atomics.waitAsync(this._metaWritable, 0, 1)
@@ -133,9 +141,9 @@ class SharedArrayBufferWritable extends Writable {
     const buffer = this._writableState.getBuffer()
 
     // TODO add the timeout handling to avoid deadlocks
-    const r = Atomics.wait(this._metaWritable, 0, 1)
+    Atomics.wait(this._metaWritable, 0, 1)
 
-    let toWrite = new Array(buffer.length)
+    const toWrite = new Array(buffer.length)
     for (let i = 0; i < buffer.length; i++) {
       toWrite[i] = buffer[i].chunk
     }

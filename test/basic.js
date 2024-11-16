@@ -68,3 +68,26 @@ test('flushSync', async (t) => {
     t.assert.equal(err.code, 'ERR_STREAM_PREMATURE_CLOSE')
   }
 })
+
+test('writev', async (t) => {
+  t.plan(3)
+
+  const sharedArrayBuffer = new SharedArrayBuffer(1024, {
+    maxByteLength: 16 * 1024 * 1024
+  })
+
+  const worker = new Worker(join(__dirname, '..', 'fixtures', 'producer-writev.js'), {
+    workerData: { sharedArrayBuffer }
+  })
+  const readable = new SharedArrayBufferReadable({ sharedArrayBuffer, worker, objectMode: true })
+
+  const expected = [
+    'Hello, A!',
+    'Hello, B!',
+    'Hello, C!'
+  ]
+
+  for await (const chunk of readable) {
+    t.assert.equal(chunk.toString(), expected.shift())
+  }
+})
