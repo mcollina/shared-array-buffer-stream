@@ -43,7 +43,7 @@ test('consumer to producer', async (t) => {
 })
 
 test('flushSync', async (t) => {
-  t.plan(4)
+  t.plan(7)
 
   const sharedArrayBuffer = new SharedArrayBuffer(1024, {
     maxByteLength: 16 * 1024 * 1024
@@ -57,7 +57,10 @@ test('flushSync', async (t) => {
   const expected = [
     'Hello, A!',
     'Hello, B!',
-    'Hello, C!'
+    'Hello, C!',
+    'Hello, D!',
+    'Hello, E!',
+    'Hello, F!',
   ]
 
   try {
@@ -70,7 +73,7 @@ test('flushSync', async (t) => {
 })
 
 test('writev', async (t) => {
-  t.plan(3)
+  t.plan(7)
 
   const sharedArrayBuffer = new SharedArrayBuffer(1024, {
     maxByteLength: 16 * 1024 * 1024
@@ -84,7 +87,11 @@ test('writev', async (t) => {
   const expected = [
     'Hello, A!',
     'Hello, B!',
-    'Hello, C!'
+    'Hello, C!',
+    'Hello, D!',
+    'Hello, E!',
+    'Hello, F!',
+    'Hello, G!'
   ]
 
   for await (const chunk of readable) {
